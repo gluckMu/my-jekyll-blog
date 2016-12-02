@@ -10,12 +10,12 @@ url: "https://gluckmu.github.io"
 
 # author
 author:
-  name: 'Jack'
-  first_name: 'Jia'
-  last_name: 'Kun'
-  email: 'me@jack003.com'
-  facebook_username: 'jiakunnj'
-  github_username: 'JiaKunUp'
+  name: 'Lili'
+  first_name: 'Lili'
+  last_name: 'Fang'
+  email: 'lilifang0315@gmail.com'
+  facebook_username: 'gluckMu'
+  github_username: 'gluckMu'
   head_img: '/static/img/landing/Jack.jpg'
   desc: 'I am a Full Stack engineer with website development, automation Ops and writing scripts experience. Life is a continuous learning process, so work makes me more rigorous, travel makes my life more colorful. I can make lots of friends when I coding and travel.'
 

@@ -7,9 +7,10 @@ keywords: "React Native"
 categories: [iOS]
 tags: [iOS, React Native]
 ---
+
 >基于2016-11-17的[React Native](https://github.com/facebook/react-native)源码
 
-####一、简介
+####简介
 
 * What: React Native并不是开发Hybrid App，它是为开发人员提供了一套使用JavaScript开发Native App的开发框架。
 
@@ -17,7 +18,7 @@ tags: [iOS, React Native]
 
 * How: 不同于JSPatch利用Objective-C的Runtime机制动态创建新的类型或方法，React Native是预先使用Native实现了一堆可用的组件，然后通过JavaScript去调用这些组件，在这一点上，React Native有点类似于Hybrid App里面JavaScript去调用Native方法的做法。这里面的重点就是JavaScript如何与Native通信，实现相互调用。
 
-####二、Native与JavaScript通信
+####Native与JavaScript通信
 
 &emsp;&emsp;&emsp;&emsp;在iOS中，Native与JavaScript通信有两种方法，一种是通过UIWebView（iOS 8.0以后又有了WKWebView），一种是通过JavaScriptCore，后者是iOS 7.0以后才提供的，不过根据苹果官方的统计数据，iOS 9.0以上占有率92%，所以可以忽略系统要求。
 
@@ -47,7 +48,7 @@ tags: [iOS, React Native]
 
 &emsp;&emsp;&emsp;&emsp;JavaScriptCore相对于UIWebView来说，更加的方便，因为不用再通过隐式的URL请求去调用Native，直接就可以调用对象方法，而且更加安全，在执行js时，可以添加exceptionHandler，所以前者更加吸引人，但是现在苹果官方并没有开放获取UIWebView的JSContext的方法，所以导致在Hybrid App的开发中，可能需要些黑科技，但是React Native并不是开发Hybrid App，它实际上就是去执行JavaScript代码，所以使用JavaScriptCore是最优的。当然，React Native也提供了使用自定义JavaScript执行引擎的功能。
 
-####三、通信实现
+####通信实现
 #####1. JavaScript调用Native
 
 &emsp;&emsp;&emsp;&emsp;JavaScript调用Native方法有几个难点需要解决
@@ -111,7 +112,7 @@ tags: [iOS, React Native]
 
 &emsp;&emsp;&emsp;&emsp;针对第二个问题，JavaScript在知道所有Native提供的模块信息后，在调用Native方法时，就通过JavaScript Bridge去“通知”Native Bridge，提供相应的模块ID、方法ID、入参（包括回调），Native Bridge在“接收”调用信息后，根据模块ID、方法ID就能从自己的模块配置表中找到对应的实现方法，然后将入参传递过去，执行方法即可，实现方法的调用。
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;![JavaScritp Invoke Native](images/JSInvokeNative.png)
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;![JavaScritp Invoke Native]({{ site.img_path }}/ReactNative_Bridge/JSInvokeNative.png)
 
 &emsp;&emsp;&emsp;&emsp;这里又引入另一个问题，就是**JavaScript Bridge如何去“通知”Native Bridge现在有方法调用?**
 
@@ -225,7 +226,7 @@ tags: [iOS, React Native]
 	}
 	
 
-####四、模块配置表
+####模块配置表
 
 &emsp;&emsp;&emsp;&emsp;React Native中JavaScript调用Native方法的核心便是模块配置表，实际上Native端和JavaScript端提供的方法都有个模块配置表，但是其中JavaScript端的模块配置表只会存在JavaScript Bridge中，不会传递给Native端，不过两者的思想是一致的，都是模块自行去Bridge中注册自己，只不过由于语言特性的区别，导致在实现上会有差异，在这里我们着重讨论的是Native端的这个模块配置表是怎么生成的。模块配置表的生成，主要包括两个部分，一是模块的注册，二是模块具体对外开放的方法的注册。
 
@@ -239,6 +240,6 @@ tags: [iOS, React Native]
 
 &emsp;&emsp;&emsp;&emsp;经过以上两步，Native端就可以生成出模块配置表，剩下的就是要传给JavaScript即可。在传递过程中，React Native采用了“延迟加载”，在绝大多数情况下（也就是不修改默认的JavaScriptExecutor），Native利用JavaScriptCore向JavaScript端注入模块列表时，只会将模块的名称告诉JavaScript，JavaScript Bridge会根据这个列表来生成相应的模块对象，不过这时候这个对象是空的，当真正需要使用这个模块对象时，就会去根据模块名称，调用JSContext里Native方法`nativeRequireModuleConfig`，返回模块的所有配置信息，实现了模块在使用时才加载。这种“延迟加载”在React Native中被广泛使用，并不仅仅是这一处。
 
-####五、总结
+####总结
 
 &emsp;&emsp;&emsp;&emsp;React Native中Native与JavaScript通信的过程大致就这些，但是其它还有很多的细节，例如队列的管理、JavaScriptExecutor的处理、性能的检测等，这些每一项都相当复杂，可以自行去查看源码。
