@@ -36,19 +36,20 @@ tags: [iOS, React Native]
 * Native执行JavaScript：利用JavaScriptCore提供的JSContext，调用其`evaluateScript:`方法。
 
 ```javascript
-[jsContext evaluateScript:@"js代码"];
+  [jsContext evaluateScript:@"js代码"];
 ```
 
 或者是通过JSContext先获取JavaScript方法名，然后通过JSValue的`callWithArguments:`方法，但是这个只能调用方法，不能执行JavaScript片段。
 
 ```javascript
-JSValue *method = jsContext[@"方法名"];
-[method callWithArguments:@[参数]];
+  JSValue *method = jsContext[@"方法名"];
+  [method callWithArguments:@[@"参数"]];
 ```
 
 * JavaScript调用Native：利用JSContext的`setObject:forKeyedSubscript:`方法，可以将Native对象或者Block塞进JavaScript运行的上下文中，然后Web端通过这个上下文就可以获取Native对象，然后直接执行即可。这里值得有两点需要注意，第一是怎么获取Web端运行时的JSContext，这个通过KVC可以从UIWebView中获取，但是在app审核可能被苹果拒绝，因为这是一种hack方法，依赖了UIWebView的内部对象，不过还是有牛人发现可以通过WebKit的内部机制来实现，这个比较复杂，具体不再此阐述，详见[这里](https://github.com/TomSwift/UIWebView-TS_JavaScriptContext)，对应的中文版看[这里](http://hao.jser.com/archive/9062/)。
-```javascript
-JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+
+```objc
+  JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
 ```
 
 &emsp;&emsp;第二，如果是set对象的话，这个对象暴露给JavaScript的方法要封装成协议，并且这个协议需要遵从JSExport协议，最后这个对象只要实现这个自定义的协议即可。
@@ -66,17 +67,17 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
 &emsp;&emsp;React Native针对以上问题的解决方案，就是实现了一个模块配置表，然后在Native和JavaScript端都实现一个Bridge，在这个Bridge中各自保存了一份相同的模块配置表，这个配置表中包含了所有的模块列表信息，包括模块名称，模块ID，模块提供的方法列表信息（方法列表中又包括方法名称，方法ID，方法类型），模块提供的常量。注意，这里的这个模块配置表只是逻辑上的，真正实现的时候，在Native端，这个模块配置表比较简单，就是个存储模块信息对象的数组；JavaScript端会根据这个配置表，生成出一个NativeModules对象，这里面包括了所有的模块对象，并且根据模块ID、方法ID、方法类型去生成一个真正的js函数，然后赋给模块对象，大致如下：
 
 ```javascript
-	"NativeModules": {
-       "RCTAlertManager": {
-           "alertWithArgs": func(...args: Array<any>) {
-               // 这里的function是根据method的type来区分的
-               // type有sync，promise，其他   
-           }
-           ...other methods
-           ...other export constants
-       },
-       ...
-    }
+  "NativeModules": {
+     "RCTAlertManager": {
+       "alertWithArgs": func(...args: Array<any>) {
+           // 这里的function是根据method的type来区分的
+           // type有sync，promise，其他
+       }
+       ...other methods
+       ...other export constants
+     },
+     ...
+  }
 ```
 
 &emsp;&emsp;根据方法类型生成方法的代码如下：
@@ -84,37 +85,37 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
 ```javascript
   NativeModules.js
 	
-	function genMethod(moduleID: number, methodID: number, type: MethodType) {
-		let fn = null;
-		if (type === 'promise') {
-			fn = function(...args: Array<any>) {
-      			return new Promise((resolve, reject) => {
-        			BatchedBridge.enqueueNativeCall(moduleID, methodID, args, (data) => resolve(data), (errorData) => reject(createErrorFromErrorData(errorData)));
-      			});
-    		};
-    	} else if (type === 'sync') {
-    		fn = function(...args: Array<any>) {
-      			return global.nativeCallSyncHook(moduleID, methodID, args);
-    		};
-    	} else {
-    		fn = function(...args: Array<any>) {
-      			const lastArg = args.length > 0 ? args[args.length - 1] : null;
-      			const secondLastArg = args.length > 1 ? args[args.length - 2] : null;
-      			const hasSuccessCallback = typeof lastArg === 'function';
-      			const hasErrorCallback = typeof secondLastArg === 'function';
-      			hasErrorCallback && invariant(hasSuccessCallback,
-        			'Cannot have a non-function arg after a function arg.'
-      			);
-      			const onSuccess = hasSuccessCallback ? lastArg : null;
-      			const onFail = hasErrorCallback ? secondLastArg : null;
-      			const callbackCount = hasSuccessCallback + hasErrorCallback;
-      			args = args.slice(0, args.length - callbackCount);
-      			BatchedBridge.enqueueNativeCall(moduleID, methodID, args, onFail, onSuccess);
-    		};
-    	}
-    	fn.type = type;
-    	return fn;
-    }
+  function genMethod(moduleID: number, methodID: number, type: MethodType) {
+  let fn = null;
+  if (type === 'promise') {
+  	fn = function(...args: Array<any>) {
+    			return new Promise((resolve, reject) => {
+      			BatchedBridge.enqueueNativeCall(moduleID, methodID, args, (data) => resolve(data), (errorData) => reject(createErrorFromErrorData(errorData)));
+    			});
+  		};
+  	} else if (type === 'sync') {
+  		fn = function(...args: Array<any>) {
+    			return global.nativeCallSyncHook(moduleID, methodID, args);
+  		};
+  	} else {
+  		fn = function(...args: Array<any>) {
+    			const lastArg = args.length > 0 ? args[args.length - 1] : null;
+    			const secondLastArg = args.length > 1 ? args[args.length - 2] : null;
+    			const hasSuccessCallback = typeof lastArg === 'function';
+    			const hasErrorCallback = typeof secondLastArg === 'function';
+    			hasErrorCallback && invariant(hasSuccessCallback,
+      			'Cannot have a non-function arg after a function arg.'
+    			);
+    			const onSuccess = hasSuccessCallback ? lastArg : null;
+    			const onFail = hasErrorCallback ? secondLastArg : null;
+    			const callbackCount = hasSuccessCallback + hasErrorCallback;
+    			args = args.slice(0, args.length - callbackCount);
+    			BatchedBridge.enqueueNativeCall(moduleID, methodID, args, onFail, onSuccess);
+  		};
+  	}
+  	fn.type = type;
+  	return fn;
+  }
 ```
 
 &emsp;&emsp;针对第一个问题，JavaScript有了这个配置表后，就自然知道Native提供了哪些模块和方法可以调用，但是这里所谓的知道，仅仅是在NativeModules中注册了而已，开发人员真正在使用的时候，还是不知道有什么模块和方法，因此，React Native在JavaScript端对NativeModules中的对象又封装了一层，衍生出了对应的模块类，方便开发人员使用，需要注意的是，React Native封装的都是它在Native端实现了的模块，所以当开发人员自己扩展Native的模块时，最好还在JavaScript端也实现对应的类，方便开发。
@@ -132,27 +133,27 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
 ```javascript
   MessageQueue.js
 	
-	enqueueNativeCall(moduleID: number, methodID: number, params: Array<any>, onFail: ?Function, onSucc: ?Function) {
-		if (onFail || onSucc) {
-      		onFail && params.push(this._callbackID);
-      		this._callbacks[this._callbackID++] = onFail;
-      		onSucc && params.push(this._callbackID);
-      		this._callbacks[this._callbackID++] = onSucc;
-    	}
-    	this._callID++;
-
-	    this._queue[MODULE_IDS].push(moduleID);
-   		this._queue[METHOD_IDS].push(methodID);
-   	 	this._queue[PARAMS].push(params);
-    
-    	const now = new Date().getTime();
-    	if (global.nativeFlushQueueImmediate &&
-        	now - this._lastFlush >= MIN_TIME_BETWEEN_FLUSHES_MS) {
-      		global.nativeFlushQueueImmediate(this._queue);
-      		this._queue = [[], [], [], this._callID];
-      		this._lastFlush = now;
-    	}
+  enqueueNativeCall(moduleID: number, methodID: number, params: Array<any>, onFail: ?Function, onSucc: ?Function) {
+  if (onFail || onSucc) {
+    		onFail && params.push(this._callbackID);
+    		this._callbacks[this._callbackID++] = onFail;
+    		onSucc && params.push(this._callbackID);
+    		this._callbacks[this._callbackID++] = onSucc;
   	}
+  	this._callID++;
+
+    this._queue[MODULE_IDS].push(moduleID);
+  		this._queue[METHOD_IDS].push(methodID);
+  	 	this._queue[PARAMS].push(params);
+
+  	const now = new Date().getTime();
+  	if (global.nativeFlushQueueImmediate &&
+      	now - this._lastFlush >= MIN_TIME_BETWEEN_FLUSHES_MS) {
+    		global.nativeFlushQueueImmediate(this._queue);
+    		this._queue = [[], [], [], this._callID];
+    		this._lastFlush = now;
+  	}
+  }
 ```
 
 **那么React Native为什么这样设计呢，它这样能保证JavaScript能够实时调用起来Native方法么？**
@@ -167,14 +168,14 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
 
 &emsp;&emsp;根据前面的介绍，JavaScriptCore提供了直接调用JavaScript方法的方法，如JSContext的evaluateScript方法，但是为了更好的调用速度（github上[提交记录](https://github.com/facebook/react-native/pull/1037/files)），React Native采用了JavaScriptCore里面的JSObjectRef下面的方法来执行JavaScript方法。核心代码如下：
 
-```Objective-C
-	Native RCTJSCExecutor.m
+```objc
+  Native RCTJSCExecutor.m
 	
-	- (void)_executeJSCall:(NSString *)method
+  - (void)_executeJSCall:(NSString *)method
              arguments:(NSArray *)arguments
           unwrapResult:(BOOL)unwrapResult
               callback:(RCTJavaScriptCallback)onComplete {
-		__weak RCTJSCExecutor *weakSelf = self;
+  	__weak RCTJSCExecutor *weakSelf = self;
     [self executeBlockOnJavaScriptQueue:^{
         RCTJSCExecutor *strongSelf = weakSelf;
     		if (!strongSelf || !strongSelf.isValid) {
@@ -206,9 +207,9 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
           				jsArgs[i] = [jscWrapper->JSValue valueWithObject:arguments[i] inContext:context].JSValueRef;
         			}
         			resultJSRef = jscWrapper->JSObjectCallAsFunction(contextJSRef, (JSObjectRef)methodJSRef, (JSObjectRef)batchedBridgeRef, arguments.count, jsArgs, &errorJSRef);
-	      		} else {
+        		} else {
         			if (!errorJSRef && jscWrapper->JSValueIsUndefined(contextJSRef, methodJSRef)) {
-	          			error = RCTErrorWithMessage([NSString stringWithFormat:@"Unable to execute JS call: method %@ is undefined", method]);
+            			error = RCTErrorWithMessage([NSString stringWithFormat:@"Unable to execute JS call: method %@ is undefined", method]);
         			}
       			}
     		} else {
@@ -231,7 +232,7 @@ JSContext *jsContext = [webView valueForKeyPath:@"documentView.webView.mainFrame
     		}
     		onComplete(objcValue, error);
       }];
-	}
+  }
 ```
 
 ### 模块配置表
