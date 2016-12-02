@@ -65,7 +65,7 @@ languages:
     flag: '/static/img/flags/China.png'
 
 # blog img path
-img_path: '/path/of/blog/img/'
+img_path: '/static/img/blog'
 
 # donate
 donate:
