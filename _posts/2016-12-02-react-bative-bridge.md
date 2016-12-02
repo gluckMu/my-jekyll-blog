@@ -161,7 +161,7 @@ tags: [iOS, React Native]
   }
 ```
 
-**那么React Native为什么这样设计呢，它这样能保证JavaScript能够实时调用起来Native方法么？**
+&emsp;&emsp;**那么React Native为什么这样设计呢，它这样能保证JavaScript能够实时调用起来Native方法么？**
 
 &emsp;&emsp;根据代码来看，React Native在所有Native调用JavaScript的函数入口处（实际上就三个，callFunctionReturnFlushedQueue、callFunctionReturnResultAndFlushedQueue和invokeCallbackAndReturnFlushedQueue），都记录了一个当前时间作为flushTime，然后同步执行相应的JavaScript方法，执行完毕后，把队列中的所有Native调用当做结果返回，这样只要所有的JavaScript逻辑都是由Native去触发的，那么理论上JavaScript里面的Native方法调用，都会在结果中直接被返回，然后执行。事实上，`React Native中所有的JavaScript方法也的确都是由Native事件触发的，这个事件可能是用户操作，或者定时器等系统事件`，所以React Native采用这种方法，可以保证Native方法被JavaScript调用起来，但是由于JavaScript的执行是存在性能消耗的，如果一个JavaScript方法执行超过一定时间，那么前面调用的Native方法可能在队列里面一直排队等待，所以React Native在执行Native方法时，会去判断当前时间距离之前记录的flushTime是否超过了一定时间差（现在是5ms），没超过就塞进队列，超过了就直接调用JSContext里Native方法`nativeFlushQueueImmediate`，告诉Native你要去取我队列了，在这里我们就明白了JavaScript的执行是有性能损耗的，这个临界值就是5ms。同时，采用队列的方法，就可以让一次JavaScript方法产生的多次Native调用，一次性返回给Native去执行，减少了Naitve和JavaScript上下文的切换。这样来看，React Native的设计是很巧妙的，如果每一次Native调用，都去直接调用JSContext，就会产生频繁的Native和JavaScript环境切换，虽然单次的交互可能更及时，但是从整体上看，并不一定保证调用的实时性；还有一种方法，就是Native启用定时器，去定时处理队列，但是这样做就会导致在这个定时器的间隔怎么确定，空闲时会导致冗余的调用，在实时性上可能又会有所缺失。
 
