@@ -41,7 +41,7 @@ printf是个C语言里面的标准方法，它接受的入参是C语言的String
 
 NSLog是Foundation框架下提供的一个日志方法，它接受的入参是Objective-C的NSString，苹果官方的解释是`Logs an error message to the Apple System Log facility`，这里面的关键字有两个，一个是error message，一个是Apple System Log。前者意思是NSLog输出的是stderr，这一点同printf是不同的，后者则说明NSLog还会向ASL写入日志。
 
-NSLog首先会对日志信息进行一次封装，添加时间戳、进程名称，然后将日志写进ASL，同时向stderr输出。因此，NSLog输出的日志，可以通过Console.app进行查看，但另一方面，也导致其性能的下降。
+NSLog会将日志写进ASL，ASL会自动添加时间戳、进程名称，同时向stderr输出。因此，NSLog输出的日志，可以通过Console.app进行查看，但另一方面，也导致其性能的下降。
 
 ### 总结
 
