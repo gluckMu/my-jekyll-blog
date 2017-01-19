@@ -1,4 +1,12 @@
-# iOS开发基础——日志
+---
+layout: post
+title:  "iOS开发基础——日志"
+date:   2017-01-12
+desc: "iOS开发基础——日志"
+keywords: "iOS开发"
+categories: [iOS]
+tags: [iOS]
+---
 
 ## 前言
 

@@ -1,4 +1,12 @@
-# npm组件发布步骤
+---
+layout: post
+title:  "NPM组件发布步骤"
+date:   2016-12-16
+desc: "NPM组件发布步骤"
+keywords: "NodeJS"
+categories: [JavaScript]
+tags: [JavaScript]
+---
 
 ## 发布前准备
 

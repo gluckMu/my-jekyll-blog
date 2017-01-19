@@ -1,4 +1,12 @@
-# iOS开发基础——配置
+---
+layout: post
+title:  "iOS开发基础——配置"
+date:   2017-01-19
+desc: "iOS开发基础——配置"
+keywords: "iOS开发"
+categories: [iOS]
+tags: [iOS]
+---
 
 ## 引言
 

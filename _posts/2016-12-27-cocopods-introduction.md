@@ -1,4 +1,12 @@
-# CocoPods使用
+---
+layout: post
+title:  "CocoaPods使用"
+date:   2016-12-27
+desc: "CocoaPods使用"
+keywords: "CocoaPods"
+categories: [iOS]
+tags: [iOS]
+---
 
 ## 安装
 
@@ -19,13 +27,13 @@ https://gems.ruby-china.org
 $ sudo gem install cocoapods (-pre #此参数用来安装最新版)
 ```
 
-CocoPods的安装就这么简单
+CocoaPods的安装就这么简单
 
 ## 使用
 
 ### 下载Specs Repo
 
-CocoPods在使用时，会先在本地下载Specs Repo，这个Specs Repo里面存储了所有的可用的pod列表，之后的search都是通过Specs Repo来实现的。
+CocoaPods在使用时，会先在本地下载Specs Repo，这个Specs Repo里面存储了所有的可用的pod列表，之后的search都是通过Specs Repo来实现的。
 
 Specs Repo是放在github上的，由于国内网络环境问题，导致github不稳定，且速度极慢，在网上搜索的几个国内的镜像也已经挂了，个人推荐还是挂上VPN直接git clone吧。
 
@@ -48,7 +56,7 @@ git clone https://github.com/CocoaPods/Specs.git master
 
 ### 项目使用
 
-进入需要使用CocoPods的iOS工程目录，然后执行
+进入需要使用CocoaPods的iOS工程目录，然后执行
 
 ```
 pod init
@@ -82,7 +90,7 @@ target 'FMComponent' do
 end
 ```
 
-具体的pod语法不在这里介绍，可以直接去[CocoPods官网](https://cocoapods.org/)查看。
+具体的pod语法不在这里介绍，可以直接去[CocoaPods官网](https://cocoapods.org/)查看。
 
 然后，执行
 
@@ -103,7 +111,7 @@ pod update (--verbose --no-repo-update #建议带上，省去更新过程)
 ### 其他
 
 ```
-pod env  #查看CocoPods环境
-pod --version #查看CocoPods版本
+pod env  #查看CocoaPods环境
+pod --version #查看CocoaPods版本
 pod search *** #搜索包
 ```
