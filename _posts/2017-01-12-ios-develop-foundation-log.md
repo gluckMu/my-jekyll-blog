@@ -284,6 +284,6 @@ asl_object_t SystemSafeASLNext(asl_object_t r) {
 
 实际上，iOS 10带来的ASL问题暂时也没什么好的解决办法（如果有的话，请告诉我），在这种情况下，为了实现第三个功能，就只能在iOS 10上用重定向来实现日志获取，如果需要在Debug Console中查看日志时，那就只能将stderr重定向到原来的位置，这也是一种临时的解决办法。
 
-##参考
+## 参考
 
 * [重定向NSLog](http://titm.me/?cat=1)
