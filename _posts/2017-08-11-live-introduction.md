@@ -14,7 +14,9 @@ tags: [直播]
 * PGC，Professionally-generated Content也称为PPC，Professionally-produced Content
 * OGC，Occupationally-generated Content
 
-![直播分类](category.png)
+<div align='center'>
+<img src="{{site.baseurl}}{{ site.img_path }}/Live_Introduction/category.png" alt="直播分类"/>
+</div>
 
 不同类型的直播导致需求的不同，例如连麦，这个会影响技术的实现。
 
