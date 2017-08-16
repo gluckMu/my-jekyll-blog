@@ -98,6 +98,22 @@ self.webview.load(URLRequest(url: URL(string: "https://www.baidu.com")!))
 
 iOS 11里，WKWebView还是与URLProtocol不兼容，也不走NSURLCache，所以之前的利用URLProtocol实现的缓存策略，无法在WKWebView上使用，而新增的schema handler由于禁止注册http、https这类系统保留schema，所以也无法使用，暂时来看，想在WKWebView上做缓存还是没什么好办法。
 
+### WKWebView与URLProtocol兼容解决办法
+
+利用WebKit里面的WKBrowsingContextController私有API可以使WKWebView兼容URLProtocol，但是由于使用了私有API，所以上架AppStore可能就存在问题。
+
+```
+Class cls = NSClassFromString(@"WKBrowsingContextController");
+SEL sel = NSSelectorFromString(@"registerSchemeForCustomProtocol:");
+if ([(id)cls respondsToSelector:sel]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    NSLog(@"Hack method");
+    [(id)cls performSelector:sel withObject:@"http"];
+#pragma clang diagnostic pop
+}
+```
+
 ## 参考
 
 * [WWDC 2017 Session 220 Customized Loading in WKWebView](https://developer.apple.com/videos/play/wwdc2017/220/)
