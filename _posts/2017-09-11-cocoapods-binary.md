@@ -181,3 +181,10 @@ end
 2. 目前无法通过在需要二进制化的pod后面增加配置项来标识，因为CocoaPods会去校验，所以现在只能通过额外设置一个数组来指定是否需要二进制化，然后通过环境配置项ENABLE_STATIC_LIB统一控制是否二进制化，后续如果改成插件需要研究是否能够通过增加配置项来达到单独控制的效果；
 3. 目前还只支持静态库.a的封装，后续还要支持framework；
 4. 删除pods时还没有增加删除静态库的操作；
+
+## 参考
+
+* [细聊 Cocoapods 与 Xcode 工程配置](https://bestswifter.com/cocoapods/)
+* [CocoaPods 都做了什么？](http://draveness.me/cocoapods.html)
+* [基于 CocoaPods 进行 iOS 开发](https://blog.dianqk.org/2017/05/01/dev-on-pod/)
+* [CocoaPods组件平滑二进制化解决方案](http://www.infoq.com/cn/articles/cocoapods-binarization)
