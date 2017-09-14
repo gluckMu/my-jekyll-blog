@@ -146,7 +146,7 @@ end
 
 ```ruby
 def libsNeedBuild(installer, libs)
-	unchangedLibs = installer.analysis_result.podfile_state.unchanged
+	unchangedLibs = installer.analysis_result.sandbox_state.unchanged
 	changedLibs = libs.delete_if { |lib| unchangedLibs.include?(lib) }
 	changedLibs
 end
