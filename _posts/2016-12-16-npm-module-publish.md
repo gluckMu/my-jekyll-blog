@@ -14,7 +14,7 @@ tags: [JavaScript]
 
 设置仓库源
 
-`npm set registry http://10.60.80.72:48730`
+`npm set registry http://xx.xx.xx.xx:xxxxx`
 
 ##### npm用户登录
 
@@ -56,7 +56,7 @@ tags: [JavaScript]
 
 ## git repo创建
 
-在内网GitLab里的[ufo-component](http://10.60.80.49:8060/groups/ufo-component)组中，创建一个新的工程，名字就是要发布的组件名，每一个发布的组件在ufo-component组中都必须有一个对应的git repo。
+在GitLab里的[ufo-component](http://xx.xx.xx.xx:xxxx/groups/ufo-component)组中，创建一个新的工程，名字就是要发布的组件名，每一个发布的组件在ufo-component组中都必须有一个对应的git repo。
 
 ## npm组件初始化
 
@@ -116,7 +116,7 @@ README文件应当包含以下内容：
 
 `npm publish`
 
-发布完成后，就可以在[内网仓库](http://10.60.80.72:48730/)上查看到该组件，其他项目也可以使用该组件。
+发布完成后，就可以在[仓库](http://xx.xx.xx.xx:xxxxx/)上查看到该组件，其他项目也可以使用该组件。
 
 ## npm组件更新
 
